@@ -32,6 +32,7 @@ function runGrammar {
 }
 
 function clean {
+    git clean -xdi
     removeDirectory target
     removeDirectory generated
 }    
