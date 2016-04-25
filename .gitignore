@@ -8,6 +8,9 @@
 *.war
 *.ear
 
+# CSharp/Mono
+*.exe
+
 # ANTLR V4
 *.tokens
 
