@@ -8,6 +8,12 @@ function grun {
     java org.antlr.v4.gui.TestRig $*
 }
 
+function createIfNotExists {
+    if [ ! -d "$1" ]; then
+	mkdir -p $1
+    fi
+}
+
 function recreateDirectory {
     if [ -d "$1" ]; then
 	rm -rf $1
@@ -23,25 +29,41 @@ function removeDirectory {
 }    
 
 function runGrammar {
-    cp grammars/java/Java.g4 target
-    antlr4 -o generated grammars/java/Java.g4
-    javac generated/grammars/java/*.java -d target
-    pushd target
-    grun Java compilationUnit ../generated/grammars/java/*.java
+    grammarPath=$1
+    grammarFile=`basename $1`
+    grammarDir=`dirname $1`
+    grammarName=$(echo $grammarFile | cut -f 1 -d '.')
+    targetDir=target/$grammarDir
+
+    # Copy grammar file to target
+    createIfNotExists $targetDir
+    target/preprocess.exe $grammarPath $targetDir/$grammarFile grammars/include
+    
+    # Generate and compile Java files to target then test grammar
+    pushd $targetDir
+    antlr4 -o generated $grammarFile
+    javac generated/*.java -d .
+    grun $grammarName compilationUnit generated/*.java
     popd
 }
 
+function runGrammars {
+    runGrammar grammars/java/Java.g4
+    runGrammar grammars/split-java/Java.g4
+}
+
 function clean {
-    git clean -xdi
+    #TODO(Ibrahim) Need to find a better alternative.
+    # Should delete files and directories ignored by git
+    #git clean -xdi
     removeDirectory target
-    removeDirectory generated
 }    
 
 function main {
     clean
-    
     recreateDirectory target
-    runGrammar
+    gmcs csharp/preprocess.cs -out:target/preprocess.exe
+    runGrammars
 }
 
 main
