@@ -53,8 +53,7 @@ namespace Mindfulthinktank.Utilities
 	      //
               bool found = false;
 	      foreach (var path in paths) {
-	        string fullPath = path + include;
-		Console.WriteLine(fullPath);
+	        string fullPath = Path.Combine(path, include);
 		if (!File.Exists(fullPath)) continue;
 		found = true;
 		using (var includeReader = new StreamReader(fullPath)) {
